@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block body%}
+<div class="msg">{{ msg }}</div>
+<div class="container">
+  <div class="row">
+    <div class="col-md col-centered">
+        <h4>{{ title }}</h4>
+        <ul>
+          <li>Isbn: {{ isbn }}</li>
+          <li>Author: {{ author }}</li>
+          <li>Year: {{ year }}</li>
+          <li>Average Rating(Goodreads): {{ avg }}</li>
+          <li>Number of Ratings(Goodreads): {{ cnt }}</li>
+          <a href="/back">Back...</a>
+        </ul>
+      <h4>Reviews:</h4>
+      <strong>{{ user1 }}</strong><br>
+      {{ user1r }}<br>
+      {{ stars  }}<br>
+      <strong>{{ user2 }}</strong><br>
+      {{ user2r }}<br>
+      {{ stars2 }}
+      <h4>Your review:</h4>
+      <strong>{{ your }}</strong><br>
+      {{ yourr }}
+      <form action="" method="POST" name="">
+        <textarea name="review" rows="6" cols="40" maxlength="200"required></textarea><br>
+        <label for="star">Rating out of 5:</label><br>
+        <select name="star" required>
+          <option >1</option>
+          <option >2</option>
+          <option >3</option>
+          <option >4</option>
+          <option >5</option>
+        </select><br>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+    <div class="col-md col-centered">
+      Some books released in the same year:<br>
+      <strong>{{ sim0 }} </strong><br>
+      <strong>{{ sim1 }} </strong><br>
+      <strong>{{ sim2 }} </strong><br>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

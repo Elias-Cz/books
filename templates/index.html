@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+  {% block body %}
+
+
+  Please log in or make an account to continue:
+  <hr>
+  <div class="col-8 col-centered">
+  <form action="/register" method="POST">
+    <button type="submit">Register</button>
+  </form>
+  <br>
+  <form action="/login" method="POST">
+    <button type="submit">Log In</button>
+  </form>
+  </div>
+
+  {% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+  <h1 class="display-4">Hello, {{ username }}! </h1><br>
+  <p class="lead">Search for books by isbn, author or title or Year</p>
+  <form class="ex" method="POST">
+    <input type="text" name="book" placeholder="eg: Neuromancer" required>
+    <button type="submit">Search</button>
+  </form>
+  {{ msg }}
+  <br>
+
+
+
+
+
+{% endblock %}
