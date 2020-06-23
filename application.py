@@ -26,19 +26,19 @@ db = scoped_session(sessionmaker(bind=engine))
 
 # Function that gets used a few times for submitting reviews
 
-def stuff():
-    isbn = request.args['isbn']
-    name = request.args['username']
+def stuff(isbn):
+    name = session['username']
     ok = db.execute("SELECT rev_user FROM reviews WHERE isbn = :isbn", {"isbn": isbn})
     print(ok)
     if request.method == 'POST' and ok != None:
-        title = request.args['title']
-        isbn = request.args['isbn']
-        author = request.args['author']
-        year = request.args['year']
+        review_target = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
+        title = review_target.title
+        isbn = review_target.isbn
+        author = review_target.author
+        year = review_target.year
         rev = request.form.get("review")
         str = request.form.get("star") + "/5"
-        username = request.args['username']
+        username = session["username"]
         db.execute("INSERT INTO reviews (rev_user, review, isbn, stars) VALUES (:username, :rev, :isbn, :str)", {"username": username, "rev": rev, "isbn": isbn, "str": str})
         db.commit()
         flash("your review has been submitted")
@@ -119,27 +119,34 @@ def home():
     username = request.args['username']
     if request.method == "POST":
         res = '%'+ request.form.get('book') + '%'
-        rows = db.execute("SELECT * FROM books WHERE LOWER(title) LIKE LOWER(:res) OR LOWER(author) LIKE LOWER(:res) OR year LIKE :res OR isbn LIKE :res", {"res": res}).fetchone()
-        if rows is None:
-            flash("book not found")
-            return render_template("home.html", username=username)
-        else:
-            return redirect(url_for('book', username=username, title=rows.title, isbn=rows.isbn, year=rows.year, author=rows.author))
+        return redirect(url_for('results', res=res))
     return render_template("home.html", username=username)
 
 # Once user has searched for a book, they are taken to this route, which displays related results and reviews, plus extra info
+@app.route('/results', methods=['POST', 'GET'])
+def results():
+    res = request.args['res']
+    rows = db.execute("SELECT * FROM books WHERE LOWER(title) LIKE LOWER(:res) OR LOWER(author) LIKE LOWER(:res) OR year LIKE :res OR isbn LIKE :res LIMIT 5", {"res": res}).fetchall()
+    username = session["username"]
+    if not rows:
+        flash("book not found")
+        return redirect(url_for("home", username=username))
+    else:
+        return render_template("results.html", rows=rows, username=username)
 
-@app.route('/book', methods=['POST', 'GET'])
-def book():
-    name = "username" in session
-    title = request.args['title']
-    isbn = request.args['isbn']
-    author = request.args['author']
-    year = request.args['year']
-    sim = db.execute("SELECT title FROM books WHERE year LIKE :year ORDER BY RANDOM() LIMIT 3", {"year": year}).fetchall()
-    sim0 = sim[0]["title"]
-    sim1 = sim[1]["title"]
-    sim2 = sim[2]['title']
+
+@app.route('/results=<book>', methods=['POST', 'GET'])
+def book(book):
+    name = session["username"]
+    isbn = book
+    print(isbn)
+    br = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
+    title = br.title
+    print(title)
+    author = br.author
+    year = br.year
+    #author = request.args['author']
+    #year = request.args['year']
     res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "w9Np63RHCDhV5fIkdoF43w", "isbns": isbn})
     if res.status_code != 200:
         return ('error: api request unsuccessful')
@@ -152,7 +159,7 @@ def book():
 # Checks for exisiting reviews
     if cr.rowcount == 0:
         flash("no reviews for this book, be the first to review it!")
-        stuff()
+        stuff(isbn)
     elif cr.rowcount == 1:
         ur = cr.fetchall()
         rows = cr.rowcount
@@ -160,8 +167,8 @@ def book():
         cd = db.execute("SELECT rev_user, review, stars FROM reviews WHERE isbn = :isbn AND rev_user = :user1", {"user1": user1, "isbn": isbn}).fetchone()
         #cb = None
 # Review function defined initially
-        stuff()
-        return render_template('book.html', stars=cd.stars, user1r=cd.review, user1=cd.rev_user, title=title, year=year, author=author, isbn=isbn, avg=avg, cnt=cnt, sim1=sim1, sim0=sim0, sim2=sim2)
+        stuff(isbn)
+        return render_template('book.html', stars=cd.stars, user1r=cd.review, user1=cd.rev_user, title=title, year=year, author=author, isbn=isbn, avg=avg, cnt=cnt)
 
 
     elif cr.rowcount > 0:
@@ -171,9 +178,9 @@ def book():
         user2 = ', '.join(ur[1])
         cd = db.execute("SELECT rev_user, review, stars FROM reviews WHERE isbn = :isbn AND rev_user = :user1", {"user1": user1, "isbn": isbn}).fetchone()
         cb = db.execute("SELECT rev_user, review, stars FROM reviews WHERE isbn = :isbn AND rev_user = :user2", {"user2": user2, "isbn": isbn}).fetchone()
-        stuff()
-        return render_template('book.html', stars=cd.stars, user2=cb.rev_user, stars2=cb.stars, user2r=cb.review, user1r=cd.review, user1=cd.rev_user, title=title, year=year, author=author, isbn=isbn, avg=avg, cnt=cnt, sim1=sim1, sim0=sim0, sim2=sim2)
-    return render_template('book.html', title=title, year=year, author=author, isbn=isbn, avg=avg, cnt=cnt, sim1=sim1, sim0=sim0, sim2=sim2)
+        stuff(isbn)
+        return render_template('book.html', stars=cd.stars, user2=cb.rev_user, stars2=cb.stars, user2r=cb.review, user1r=cd.review, user1=cd.rev_user, title=title, year=year, author=author, isbn=isbn, avg=avg, cnt=cnt)
+    return render_template('book.html', title=title, year=year, author=author, isbn=isbn, avg=avg, cnt=cnt)
 # Route to return from bookpage
 @app.route('/back')
 def back():

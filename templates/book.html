@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
-{% block body%}
-<div class="msg">{{ msg }}</div>
-<div class="container">
-  <div class="row">
-    <div class="col-md col-centered">
+  {% block body %}
+  <div class="msg">{{ msg }}</div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md col-centered">
         <h4>{{ title }}</h4>
         <ul>
           <li>Isbn: {{ isbn }}</li>
@@ -20,6 +20,9 @@
       <strong>{{ user2 }}</strong><br>
       {{ user2r }}<br>
       {{ stars2 }}
+
+    </div>
+    <div class="col-md col-centered">
       <h4>Your review:</h4>
       <strong>{{ your }}</strong><br>
       {{ yourr }}
@@ -35,14 +38,7 @@
         </select><br>
         <button type="submit">Submit</button>
       </form>
-    </div>
-    <div class="col-md col-centered">
-      Some books released in the same year:<br>
-      <strong>{{ sim0 }} </strong><br>
-      <strong>{{ sim1 }} </strong><br>
-      <strong>{{ sim2 }} </strong><br>
-
+      </div>
     </div>
   </div>
-</div>
-{% endblock %}
+  {% endblock %}

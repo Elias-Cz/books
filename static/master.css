@@ -1,12 +1,14 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
 
 .bg {
-  /* The image used */
-  background-image: url("book.jpg");
-  /* Full height */
+  background: url("book.jpg") no-repeat center center fixed;
   height: 100%;
-  /* Center and scale the image nicely */
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover; }
+}
 
-/*# sourceMappingURL=master.css.map */
+.jumbotron {
+  margin: 20px;
+  font-size: 15px;
+}
