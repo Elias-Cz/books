@@ -3,6 +3,16 @@ html, body {
   margin: 0;
 }
 
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: lightgrey;
+  text-decoration: underline;
+}
+
 .bg {
   background: url("book.jpg") no-repeat center center fixed;
   height: 100%;

@@ -2,7 +2,7 @@
   {% block body %}
 
     Hey, {{ username }}! Heres what we found based on your search:
-
+    <hr>
     {% for rows in rows %}
       <br><a href="results={{ rows[0] }}">{{ rows[1] }}, {{ rows[2] }}</a>
     {% endfor %}
