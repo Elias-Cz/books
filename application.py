@@ -28,12 +28,11 @@ db = scoped_session(sessionmaker(bind=engine))
 
 def stuff(isbn):
     name = session['username']
-    ok = db.execute("SELECT rev_user FROM reviews WHERE isbn = :isbn", {"isbn": isbn})
+    ok = db.execute("SELECT rev_user FROM reviews WHERE isbn = :isbn AND rev_user = :name", {"isbn": isbn, "name": name}).fetchone()
     print(ok)
-    if request.method == 'POST' and ok != None:
+    if request.method == 'POST' and ok == None:
         review_target = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
         title = review_target.title
-        isbn = review_target.isbn
         author = review_target.author
         year = review_target.year
         rev = request.form.get("review")
@@ -42,7 +41,7 @@ def stuff(isbn):
         db.execute("INSERT INTO reviews (rev_user, review, isbn, stars) VALUES (:username, :rev, :isbn, :str)", {"username": username, "rev": rev, "isbn": isbn, "str": str})
         db.commit()
         flash("your review has been submitted")
-    elif ok == None:
+    elif request.method == 'POST' and ok != None:
         flash("You have already submitted a review!")
 
 # Default route. Prompts user to either log in or register as a user.
@@ -126,7 +125,7 @@ def home():
 @app.route('/results', methods=['POST', 'GET'])
 def results():
     res = request.args['res']
-    rows = db.execute("SELECT * FROM books WHERE LOWER(title) LIKE LOWER(:res) OR LOWER(author) LIKE LOWER(:res) OR year LIKE :res OR isbn LIKE :res LIMIT 5", {"res": res}).fetchall()
+    rows = db.execute("SELECT * FROM books WHERE LOWER(title) LIKE LOWER(:res) OR LOWER(author) LIKE LOWER(:res) OR year LIKE :res OR isbn LIKE :res LIMIT 10", {"res": res}).fetchall()
     username = session["username"]
     if not rows:
         flash("book not found")
@@ -142,7 +141,6 @@ def book(book):
     print(isbn)
     br = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
     title = br.title
-    print(title)
     author = br.author
     year = br.year
     #author = request.args['author']
